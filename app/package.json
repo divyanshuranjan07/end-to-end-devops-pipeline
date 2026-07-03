@@ -1,0 +1,22 @@
+{
+  "name": "end-to-end-devops-pipeline",
+  "version": "1.0.0",
+  "description": "End-to-End DevOps CI/CD Pipeline using Jenkins, Docker, Kubernetes (Minikube), Prometheus and Grafana",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "devops",
+    "docker",
+    "jenkins",
+    "kubernetes",
+    "minikube",
+    "prometheus",
+    "grafana",
+    "ci-cd"
+  ],
+  "author": "Divyanshu Ranjan",
+  "license": "MIT"
+}

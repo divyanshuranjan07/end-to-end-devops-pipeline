@@ -1,0 +1,16 @@
+.git
+.gitignore
+
+README.md
+LICENSE
+
+docs/
+docker/
+jenkins/
+kubernetes/
+monitoring/
+screenshots/
+scripts/
+
+node_modules/
+npm-debug.log
