@@ -1,16 +1,10 @@
 pipeline {
+
     agent any
 
     stages {
 
-        stage('Checkout Source Code') {
-            steps {
-                echo 'Checking out source code...'
-                checkout scm
-            }
-        }
-
-        stage('Verify Docker Installation') {
+        stage('Verify Docker') {
             steps {
                 sh 'docker --version'
             }
@@ -22,9 +16,33 @@ pipeline {
             }
         }
 
-        stage('List Docker Images') {
+        stage('Run Test Container') {
             steps {
-                sh 'docker images'
+                sh '''
+                docker rm -f test-container || true
+                docker run -d \
+                  --name test-container \
+                  -p 3001:3000 \
+                  end-to-end-devops-pipeline:v1
+                '''
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                sh '''
+                sleep 5
+                curl http://localhost:3001/health
+                '''
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                sh '''
+                docker stop test-container
+                docker rm test-container
+                '''
             }
         }
 
@@ -33,12 +51,13 @@ pipeline {
     post {
 
         success {
-            echo 'Pipeline executed successfully.'
+            echo 'Application verified successfully.'
         }
 
-        failure {
-            echo 'Pipeline execution failed.'
+        always {
+            sh 'docker rm -f test-container || true'
         }
 
     }
+
 }
