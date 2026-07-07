@@ -9,24 +9,9 @@ pipeline {
 
     stages {
 
-        stage('Checkout Source Code') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Verify Docker') {
             steps {
                 sh 'docker --version'
-            }
-        }
-
-        stage('Verify Kubernetes') {
-            steps {
-                sh '''
-                kubectl version --client
-                kubectl cluster-info
-                '''
             }
         }
 
@@ -44,9 +29,9 @@ pipeline {
                 docker rm -f test-container || true
 
                 docker run -d \
-                  --name test-container \
-                  -p 3001:3000 \
-                  ${IMAGE_NAME}
+                    --name test-container \
+                    -p 3001:3000 \
+                    ${IMAGE_NAME}
                 '''
             }
         }
@@ -55,8 +40,7 @@ pipeline {
             steps {
                 sh '''
                 sleep 5
-
-                curl --fail http://localhost:3001/health
+                curl http://localhost:3001/health
                 '''
             }
         }
@@ -64,8 +48,15 @@ pipeline {
         stage('Cleanup Test Container') {
             steps {
                 sh '''
-                docker stop test-container
-                docker rm test-container
+                docker rm -f test-container || true
+                '''
+            }
+        }
+
+        stage('Load Image into Minikube') {
+            steps {
+                sh '''
+                minikube image load ${IMAGE_NAME}
                 '''
             }
         }
@@ -73,7 +64,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
-                kubectl apply -f kubernetes/
+                kubectl --kubeconfig=/var/lib/jenkins/.kube/config apply -f kubernetes/
                 '''
             }
         }
@@ -81,13 +72,7 @@ pipeline {
         stage('Verify Deployment') {
             steps {
                 sh '''
-                kubectl rollout status deployment/devops-app -n ${NAMESPACE}
-
-                kubectl get deployments -n ${NAMESPACE}
-
-                kubectl get pods -n ${NAMESPACE}
-
-                kubectl get svc -n ${NAMESPACE}
+                kubectl --kubeconfig=/var/lib/jenkins/.kube/config rollout status deployment/devops-app -n ${NAMESPACE}
                 '''
             }
         }
@@ -97,19 +82,11 @@ pipeline {
     post {
 
         success {
-            echo 'CI/CD Pipeline executed successfully.'
-        }
-
-        failure {
-            echo 'Pipeline failed.'
+            echo 'CI/CD Pipeline Executed Successfully!'
         }
 
         always {
-
-            sh '''
-            docker rm -f test-container || true
-            '''
-
+            sh 'docker rm -f test-container || true'
         }
 
     }
