@@ -56,7 +56,7 @@ pipeline {
         stage('Load Image into Minikube') {
             steps {
                 sh '''
-                minikube image load ${IMAGE_NAME}
+                sudo -u div minikube image load ${IMAGE_NAME}
                 '''
             }
         }
@@ -64,7 +64,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
-                kubectl --kubeconfig=/var/lib/jenkins/.kube/config apply -f kubernetes/
+                sudo -u div kubectl apply -f kubernetes/
                 '''
             }
         }
@@ -72,7 +72,23 @@ pipeline {
         stage('Verify Deployment') {
             steps {
                 sh '''
-                kubectl --kubeconfig=/var/lib/jenkins/.kube/config rollout status deployment/devops-app -n ${NAMESPACE}
+                sudo -u div kubectl rollout status deployment/devops-app -n ${NAMESPACE}
+                '''
+            }
+        }
+
+        stage('Show Running Pods') {
+            steps {
+                sh '''
+                sudo -u div kubectl get pods -n ${NAMESPACE}
+                '''
+            }
+        }
+
+        stage('Show Services') {
+            steps {
+                sh '''
+                sudo -u div kubectl get svc -n ${NAMESPACE}
                 '''
             }
         }
@@ -82,11 +98,27 @@ pipeline {
     post {
 
         success {
-            echo 'CI/CD Pipeline Executed Successfully!'
+
+            echo '========================================'
+            echo 'CI/CD Pipeline Completed Successfully!'
+            echo 'Docker Image Built'
+            echo 'Application Tested'
+            echo 'Image Loaded into Minikube'
+            echo 'Application Deployed to Kubernetes'
+            echo '========================================'
+
+        }
+
+        failure {
+            echo 'Pipeline Failed!'
         }
 
         always {
-            sh 'docker rm -f test-container || true'
+
+            sh '''
+            docker rm -f test-container || true
+            '''
+
         }
 
     }
