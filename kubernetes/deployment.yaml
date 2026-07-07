@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: devops-app
+  namespace: devops-pipeline
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: devops-app
+
+  template:
+    metadata:
+      labels:
+        app: devops-app
+
+    spec:
+      containers:
+        - name: devops-app
+          image: end-to-end-devops-pipeline:v1
+          imagePullPolicy: Never
+
+          envFrom:
+            - configMapRef:
+                name: devops-config
+
+          ports:
+            - containerPort: 3000

@@ -1,9 +1,11 @@
 const http = require("http");
 const os = require("os");
 
-const PORT = 3000;
+// Environment Variables (from Kubernetes ConfigMap)
+const PORT = process.env.PORT || 3000;
 const VERSION = "1.0.0";
-const APP_NAME = "End-to-End DevOps Pipeline";
+const APP_NAME = process.env.APP_NAME || "End-to-End DevOps Pipeline";
+const ENVIRONMENT = process.env.ENVIRONMENT || "development";
 
 let requestCount = 0;
 
@@ -112,7 +114,7 @@ Kubernetes (Minikube), Prometheus and Grafana.
 
 <tr>
 <td>Environment</td>
-<td>Development</td>
+<td>${ENVIRONMENT}</td>
 </tr>
 
 <tr>
@@ -163,7 +165,8 @@ Created by Divyanshu Ranjan
         res.end(JSON.stringify({
             application: APP_NAME,
             status: "UP",
-            version: VERSION
+            version: VERSION,
+            environment: ENVIRONMENT
         }, null, 2));
 
         return;
@@ -188,6 +191,10 @@ app_requests_total ${requestCount}
 # HELP app_version Application version
 # TYPE app_version gauge
 app_version{version="${VERSION}"} 1
+
+# HELP app_environment Application environment
+# TYPE app_environment gauge
+app_environment{environment="${ENVIRONMENT}"} 1
 `);
 
         return;
@@ -205,10 +212,13 @@ app_version{version="${VERSION}"} 1
 });
 
 server.listen(PORT, "0.0.0.0", () => {
+
     console.log("--------------------------------------------");
     console.log(`${APP_NAME} is running`);
-    console.log(`URL      : http://localhost:${PORT}`);
-    console.log(`Health   : http://localhost:${PORT}/health`);
-    console.log(`Metrics  : http://localhost:${PORT}/metrics`);
+    console.log(`Environment : ${ENVIRONMENT}`);
+    console.log(`URL         : http://localhost:${PORT}`);
+    console.log(`Health      : http://localhost:${PORT}/health`);
+    console.log(`Metrics     : http://localhost:${PORT}/metrics`);
     console.log("--------------------------------------------");
+
 });
