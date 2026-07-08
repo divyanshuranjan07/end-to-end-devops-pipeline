@@ -1,22 +1,62 @@
-# Enterprise DevOps CI/CD Pipeline with Kubernetes Monitoring
+# End-to-End DevOps Pipeline on Kubernetes
 
 ## Overview
 
-This project demonstrates the implementation of a complete DevOps Continuous Integration and Continuous Deployment (CI/CD) pipeline for a containerized Node.js application. The objective is to automate application build, deployment, and monitoring using widely adopted DevOps tools and best practices.
+This project demonstrates a complete End-to-End DevOps pipeline that automates application build, testing, deployment, and monitoring using industry-standard DevOps tools. The application is containerized with Docker, deployed on Kubernetes (Minikube), automated through Jenkins CI/CD, and monitored using Prometheus and Grafana.
 
-The project simulates a real-world software delivery workflow where every code change committed to GitHub triggers an automated pipeline that builds the application, creates a Docker image, deploys it to a Kubernetes cluster running on Minikube, and monitors the deployed application using Prometheus and Grafana.
+The pipeline showcases Continuous Integration (CI), Continuous Deployment (CD), container orchestration, infrastructure automation, and observability in a local Kubernetes environment.
 
 ---
 
-## Objectives
+## Architecture
 
-- Implement a complete CI/CD pipeline.
-- Containerize an application using Docker.
-- Automate build and deployment using Jenkins.
-- Deploy workloads on Kubernetes using Minikube.
-- Monitor infrastructure and application health using Prometheus.
-- Visualize metrics through Grafana dashboards.
-- Demonstrate industry-standard DevOps workflow.
+```
+Developer
+    │
+    │ Git Push
+    ▼
+GitHub Repository
+    │
+    ▼
+Jenkins Pipeline
+    │
+    ├── Checkout Source Code
+    ├── Build Docker Image
+    ├── Run Test Container
+    ├── Perform Health Check
+    ├── Remove Test Container
+    ├── Load Image into Minikube
+    ├── Deploy to Kubernetes
+    └── Verify Deployment
+            │
+            ▼
+     Kubernetes Cluster
+            │
+    ┌───────┴────────┐
+    ▼                ▼
+Deployment      ConfigMap
+    │
+ReplicaSet
+    │
+ ┌──┴──┐
+ ▼     ▼
+Pod    Pod
+    │
+    ▼
+Service (NodePort)
+    │
+    ▼
+Node.js Application
+    │
+    ├── /health
+    └── /metrics
+            │
+            ▼
+      Prometheus
+            │
+            ▼
+        Grafana
+```
 
 ---
 
@@ -24,144 +64,228 @@ The project simulates a real-world software delivery workflow where every code c
 
 | Category | Technology |
 |----------|------------|
-| Operating System | Ubuntu 26.04 LTS |
 | Version Control | Git, GitHub |
-| Programming Language | JavaScript |
-| Runtime | Node.js |
-| Web Framework | Express.js |
-| Containerization | Docker |
 | CI/CD | Jenkins |
+| Containerization | Docker |
 | Container Orchestration | Kubernetes (Minikube) |
+| Runtime | Node.js |
 | Monitoring | Prometheus |
 | Visualization | Grafana |
 
 ---
 
-## Project Architecture
-
-```
-Developer
-     │
-     ▼
-GitHub Repository
-     │
-     ▼
-Jenkins Pipeline
-     │
-     ├── Source Code Checkout
-     ├── Install Dependencies
-     ├── Build Application
-     ├── Build Docker Image
-     └── Deploy to Kubernetes
-                    │
-                    ▼
-             Minikube Cluster
-                    │
-              Running Application
-                    │
-                    ▼
-               Prometheus
-                    │
-                    ▼
-                Grafana
-```
-
----
-
-## Repository Structure
+## Project Structure
 
 ```
 end-to-end-devops-pipeline/
 │
 ├── app/
-│   ├── Application source code
-│   └── package.json
+│   ├── server.js
+│   ├── package.json
+│   └── package-lock.json
 │
 ├── docker/
-│   ├── Dockerfile
-│   └── Docker related configuration
-│
-├── kubernetes/
-│   ├── Deployment
-│   ├── Service
-│   ├── Namespace
-│   └── Kubernetes manifests
 │
 ├── jenkins/
-│   └── Jenkinsfile
+│
+├── kubernetes/
+│   ├── namespace.yaml
+│   ├── configmap.yaml
+│   ├── deployment.yaml
+│   └── service.yaml
 │
 ├── monitoring/
-│   ├── Prometheus configuration
-│   └── Grafana dashboards
+│   ├── prometheus.yml
+│   ├── prometheus-configmap.yaml
+│   ├── prometheus-deployment.yaml
+│   ├── prometheus-service.yaml
+│   ├── grafana-deployment.yaml
+│   └── grafana-service.yaml
 │
-├── scripts/
-│   └── Utility scripts
-│
-├── docs/
-│   └── Project documentation
-│
-├── screenshots/
-│   └── Project screenshots
-│
+├── Dockerfile
+├── Jenkinsfile
+├── docker-compose.yml
 ├── README.md
-└── LICENSE
+└── .gitignore
 ```
-
----
-
-## CI/CD Workflow
-
-The project follows the following workflow:
-
-1. Developer pushes code to GitHub.
-2. Jenkins detects repository changes.
-3. Jenkins checks out the latest source code.
-4. Application dependencies are installed.
-5. Docker image is built.
-6. Docker image is deployed to Kubernetes (Minikube).
-7. Kubernetes creates and manages application Pods.
-8. Prometheus collects infrastructure and application metrics.
-9. Grafana displays real-time dashboards.
 
 ---
 
 ## Features
 
-- Automated build pipeline
-- Docker containerization
-- Kubernetes deployment
-- Continuous deployment using Jenkins
-- Infrastructure monitoring
-- Real-time dashboards
-- Professional GitHub project structure
+- Automated Continuous Integration pipeline using Jenkins
+- Automated Docker image creation
+- Application testing using a temporary Docker container
+- Automated health check validation
+- Continuous Deployment to Kubernetes
+- Kubernetes Namespace isolation
+- Externalized configuration using ConfigMap
+- NodePort service for application access
+- Prometheus metrics collection
+- Grafana dashboard for real-time monitoring
+- Rolling deployment verification
 
 ---
 
-## Current Status
+## CI/CD Workflow
 
-| Module | Status |
-|---------|--------|
-| Ubuntu Environment | Completed |
-| Git & GitHub Setup | Completed |
-| Project Structure | Completed |
-| Docker | Pending |
-| Jenkins | Pending |
-| Kubernetes | Pending |
-| Prometheus | Pending |
-| Grafana | Pending |
+1. Developer pushes code to GitHub.
+2. Jenkins checks out the latest source code.
+3. Docker builds the application image.
+4. Jenkins launches a temporary container.
+5. Health endpoint is verified.
+6. Temporary container is removed.
+7. Docker image is loaded into Minikube.
+8. Kubernetes manifests are applied.
+9. Deployment rollout is verified.
+10. Application becomes available through a Kubernetes Service.
+
+---
+
+## Kubernetes Resources
+
+The project deploys the following Kubernetes resources:
+
+- Namespace
+- Deployment
+- ReplicaSet
+- Pods
+- ConfigMap
+- NodePort Service
+
+---
+
+## Monitoring
+
+### Prometheus
+
+Prometheus scrapes application metrics from the `/metrics` endpoint every 15 seconds.
+
+Available metrics include:
+
+```text
+app_status
+app_requests_total
+app_version
+```
+
+### Grafana
+
+Grafana visualizes the metrics collected by Prometheus through interactive dashboards.
+
+Example dashboard panels include:
+
+- Application Status
+- Total Requests
+- Requests per Second
+- Application Version
+
+---
+
+## Running the Project
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/divyanshuranjan07/end-to-end-devops-pipeline.git
+cd end-to-end-devops-pipeline
+```
+
+### Start Minikube
+
+```bash
+minikube start --driver=docker
+```
+
+### Build Docker Image
+
+```bash
+docker build -t end-to-end-devops-pipeline:v1 .
+```
+
+### Load the Image into Minikube
+
+```bash
+minikube image load end-to-end-devops-pipeline:v1
+```
+
+### Deploy Kubernetes Resources
+
+```bash
+kubectl apply -f kubernetes/
+```
+
+### Deploy Monitoring Components
+
+```bash
+kubectl apply -f monitoring/prometheus-configmap.yaml
+kubectl apply -f monitoring/prometheus-deployment.yaml
+kubectl apply -f monitoring/prometheus-service.yaml
+kubectl apply -f monitoring/grafana-deployment.yaml
+kubectl apply -f monitoring/grafana-service.yaml
+```
+
+---
+
+## Access the Application
+
+Application
+
+```bash
+minikube service devops-service -n devops-pipeline --url
+```
+
+Prometheus
+
+```bash
+minikube service prometheus -n devops-pipeline --url
+```
+
+Grafana
+
+```bash
+minikube service grafana -n devops-pipeline --url
+```
+
+---
+
+## Monitoring Dashboard
+
+Grafana is configured to use Prometheus as its data source and provides visualization for:
+
+- Application Health
+- Request Count
+- Request Rate
+- Application Version
+
+---
+
+## Screenshots
+
+The `screenshots/` directory can include:
+
+- Jenkins successful pipeline execution
+- Kubernetes Pods
+- Kubernetes Services
+- Application homepage
+- Prometheus Targets page
+- Prometheus Metrics page
+- Grafana Dashboard
 
 ---
 
 ## Future Enhancements
 
-Future versions of this project may include:
-
-- ArgoCD for GitOps deployment
-- Trivy vulnerability scanning
+- GitHub Webhooks for automatic pipeline triggering
+- Dynamic Docker image tagging
+- Trivy container image scanning
 - SonarQube code quality analysis
+- Helm chart packaging
+- Argo CD GitOps deployment
+- Persistent Volumes for Prometheus and Grafana
 - NGINX Ingress Controller
 - Horizontal Pod Autoscaler
-- Deployment on Amazon EKS
+- Kubernetes Secrets integration
 
 ---
 
@@ -169,6 +293,14 @@ Future versions of this project may include:
 
 **Divyanshu Ranjan**
 
+Bachelor of Technology (Computer Science Engineering)
+
+Interests: DevOps, Cloud Computing, Kubernetes, Docker, AWS
+
 GitHub: https://github.com/divyanshuranjan07
 
-LinkedIn: https://www.linkedin.com/in/divyanshu-ranjan2807
+---
+
+## License
+
+This project is intended for educational and learning purposes.
